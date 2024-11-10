@@ -17,6 +17,10 @@ exports.getMyLearn = async (req, res) => {
                     role: "user",
                     content: `Based on the quiz score of ${quizResults}, provide a structured learning plan divided by weeks for C++. Include the hours of study and detailed breakdowns for each topic. Format the response like this:
 
+
+
+
+
 Week 1: Basics of C++
 Study Hours: 6-8 hours
 - Installation and setup (1 hour)
@@ -44,7 +48,17 @@ Study Hours: 6-8 hours
         }
 
         const feedback = response.choices[0].message.content.trim();
-        res.render('pages/my-learn', { feedback });
+
+        // Example parsing logic to split feedback into structured `learningPlan` array
+        const learningPlan = feedback.split("\n\n").map((section) => {
+            const lines = section.split("\n");
+            return {
+                topic: lines[0],  // First line is the topic (e.g., "Week 1: Basics of C++")
+                details: lines.slice(1).join("<br>") // Join remaining lines as details
+            };
+        });
+
+        res.render('pages/my-learn', { learningPlan }); // Pass structured `learningPlan` to template
     } catch (error) {
         console.error("Error generating feedback:", error);
         res.status(500).send('Error generating feedback');
