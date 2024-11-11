@@ -49,11 +49,10 @@ app.get('/results/:score', (req, res) => {
 });
 
 
-
-
 app.post('/submitQuiz', async (req, res) => {
     const userAnswers = req.body; // Получение ответов пользователя из запроса
-    const questions = await QuizQuestionModel.find({}); // Получение вопросов из базы данных
+    const quizType = req.body.quizType; // Тип квиза, который передается с формы
+    const questions = await QuizQuestionModel.find({ topic: quizType }); // Получение вопросов из базы данных
 
     let score = 0;
 
@@ -64,9 +63,56 @@ app.post('/submitQuiz', async (req, res) => {
         }
     }
 
-    // Перенаправление на страницу my-learn с передачей результатов квиза через параметр `results`
-    res.redirect(`/my-learn?results=${encodeURIComponent(score)}`);
+    // Перенаправление на разные страницы в зависимости от типа квиза
+    if (quizType === 'FL') {
+        console.log('Redirecting to LearnFL');
+        res.redirect(`/LearnFL?results=${encodeURIComponent(score)}`);
+    } else if (quizType === 'ICT') {
+        console.log('Redirecting to LearnICT');
+        res.redirect(`/LearnICT?results=${encodeURIComponent(score)}`);
+    } else if (quizType === 'CPP') {
+        console.log('Redirecting to LearnCpp');
+        res.redirect(`/LearnCpp?results=${encodeURIComponent(score)}`);
+    } else {
+        console.log('Redirecting to my-learn');
+        res.redirect(`/my-learn?results=${encodeURIComponent(score)}`);
+    }
+
 });
+
+
+app.get('/quizCpp', async (req, res) => {
+    const cppQuestions = await QuizQuestionModel.find({ topic: 'Introduction to C++' });
+    res.render('pages/quiz', { questions: cppQuestions });
+});
+
+app.get('/quizFL', async (req, res) => {
+    const flQuestions = await QuizQuestionModel.find({ topic: 'Foreign Language' });
+    res.render('pages/quizFL', { questions: flQuestions });
+});
+
+app.get('/quizICT', async (req, res) => {
+    const ictQuestions = await QuizQuestionModel.find({ topic: 'ICT' });
+    res.render('pages/quizICT', { questions: ictQuestions });
+});
+
+
+
+app.get('/learnFL', (req, res) => {
+    const score = req.query.results;
+    res.render('pages/LearnFL', { score: score });
+});
+
+app.get('/learnCPP', (req, res) => {
+    const score = req.query.results;
+    res.render('pages/LearnCPP', { score: score });
+});
+
+app.get('/learnICT', (req, res) => {
+    const score = req.query.results;
+    res.render('pages/LearnICT', { score: score });
+});
+
 
 
 
@@ -163,118 +209,20 @@ app.listen(port, "0.0.0.0", () => {
     console.log(`Server is running on ${port}`);
 });
 
- 
-async function getUserInstance(req) {
-    if (req.session.userId) {
-        return await UserModel.findById(req.session.userId).exec();
-    }
-
-    return null;
-}
-
- 
-async function ensureAuthenticated(req, res, next) {
-    if (req.session.userId) {
-        return next();
-    }
-
-    res.status(403).redirect("/login");
-}
-
-async function ensureAdmin(req, res, next) {
-    let user = null;
-
-    if (req.session.userId) {
-        user = await UserModel.findById(req.session.userId).exec();
-    }
-
-    if (user?.is_admin) {
-        return next();
-    }
-
-    res.status(403).redirect("/");
-}
-
-async function alreadyLoggedIn(req, res, next) {
-    if (req.session.userId) {
-        return res.status(303).redirect("/");
-    }
-
-    return next();
-}
-
-async function searchMoviesAndShows(query) {
-    try {
-
-        const response = await axios.get('https://api.themoviedb.org/3/search/multi', {
-            params: {
-                api_key: 'ff90285baa8888e9e1f26f80679d4de9',
-                language: 'en-US',
-                query: query,
-                page: 1
-            }
-        });
-
-        const moviesAndShows = response.data.results.map(item => ({
-            id: item.id,
-            title: item.title || item.name,
-            poster_path: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null
-        }));
-
-        return moviesAndShows;
-    } catch (error) {
-        console.error('Error fetching movies and shows:', error);
-        return null;
-    }
-}
-app.get('/quizCpp', async (req, res) => {
-    const cppQuestions = await QuizQuestionModel.find({ topic: 'Introduction to C++' });
-    res.render('pages/quiz', { questions: cppQuestions });
-});
-
-app.get('/quizFL', async (req, res) => {
-    const flQuestions = await QuizQuestionModel.find({ topic: 'Foreign Language' });
-    res.render('pages/quizFL', { questions: flQuestions });
-});
-
-app.get('/quizICT', async (req, res) => {
-    const ictQuestions = await QuizQuestionModel.find({ topic: 'ICT' });
-    res.render('pages/quizICT', { questions: ictQuestions });
-});
-
 
 app.get('/', async (req, res) => {
     try {
         const user = await getUserInstance(req);
         const items = await ItemModel.find().exec();
-        const moviesAndShows = await searchMoviesAndShows('');
 
-        res.render('pages/index.ejs', { activePage: "home", user: user ? user : null, error: null, items: items, moviesAndShows: moviesAndShows }); // Передача случайных персонажей в шаблон
+        res.render('pages/index.ejs', { activePage: "home", user: user ? user : null, error: null, items: items }); // Передача случайных персонажей в шаблон
     } catch (error) {
         console.error('Error:', error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-app.get('/tmdb', async (req, res) => {
-    try {
-        const query = req.query.q; // Получить строку запроса из URL
-        if (!query) {
-            const user = await getUserInstance(req); // Получить пользователя
-            return res.render('pages/tmdb.ejs', { error: 'Search query is empty', moviesAndShows: [], user: user });
-        }
-        const moviesAndShows = await searchMoviesAndShows(query);
-        if (moviesAndShows) {
-            const user = await getUserInstance(req); // Получить пользователя
-            res.render('pages/tmdb.ejs', { moviesAndShows: moviesAndShows, user: user }); // Передать переменные в шаблон
-        } else {
-            res.status(500).send('Failed to fetch movies and shows');
-        }
-    } catch (error) {
-        console.error('Error fetching movies and shows:', error);
-        res.status(500).send('Internal server error');
-    }
-});
+
 
 
 app.get("/admin", ensureAdmin, async (req, res) => {
@@ -424,3 +372,42 @@ app.get("/news", async (req, res) => {
     LogsModel.create({ user: user ? user._id : null, request_type: "news", request_data: null, status_code: "200", timestamp: new Date(), response_data: JSON.stringify(news)});
 });
 
+async function ensureAdmin(req, res, next) {
+    let user = null;
+
+    if (req.session.userId) {
+        user = await UserModel.findById(req.session.userId).exec();
+    }
+
+    if (user?.is_admin) {
+        return next();
+    }
+
+    res.status(403).redirect("/");
+}
+
+async function alreadyLoggedIn(req, res, next) {
+    if (req.session.userId) {
+        return res.status(303).redirect("/");
+    }
+
+    return next();
+}
+
+
+async function getUserInstance(req) {
+    if (req.session.userId) {
+        return await UserModel.findById(req.session.userId).exec();
+    }
+
+    return null;
+}
+
+
+async function ensureAuthenticated(req, res, next) {
+    if (req.session.userId) {
+        return next();
+    }
+
+    res.status(403).redirect("/login");
+}

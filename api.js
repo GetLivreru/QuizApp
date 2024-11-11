@@ -28,31 +28,7 @@ async function getMovieNews() {
 
     return answer;
 }
-async function getActors() {
-    try {
-        // Запрос к TMDB API для получения списка рандомных актеров
-        const response = await axios.get('https://api.themoviedb.org/3/person/popular', {
-            params: {
-                api_key: 'ff90285baa8888e9e1f26f80679d4de9',
-                language: 'en-US',
-                page: 1
-            }
-        });
-
-        const actors = response.data.results.slice(0, 6).map(actor => ({
-            id: actor.id,
-            name: actor.name,
-            profile_path: actor.profile_path ? `https://image.tmdb.org/t/p/w500${actor.profile_path}` : null
-        }));
-
-        return actors;
-    } catch (error) {
-        console.error('Error fetching actors:', error);
-        return null;
-    }
-}
 
 module.exports = {
     getMovieNews,
-    getActors  
 };

@@ -27,6 +27,7 @@
     <div class="container mx-auto px-4 py-5">
         <h1 class="text-2xl mb-4">"Introduction to C++" Quiz</h1>
         <form id="quizForm" action="/submitQuiz" method="post">
+            <input type="hidden" name="quizType" value="Cpp">
             <% questions.forEach((question, index) => { %>
                 <div class="mb-4 p-4 bg-white rounded shadow-md">
                     <p class="font-bold"><%= question.question %></p>
