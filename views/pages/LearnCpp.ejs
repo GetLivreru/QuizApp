@@ -3,28 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Learn CPP</title>
-    <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-<header>
-    <h1>Congratulations on completing the CPP Quiz!</h1>
-</header>
+<body class="bg-gray-900 text-white">
+<nav class="flex items-center justify-between p-6 bg-gray-800">
+    <div class="flex items-center space-x-4">
+        <a class="text-white hover:text-blue-300" href="/">Home</a>
+        <a class="text-white hover:text-blue-300" href="/my-learn">My Learn</a>
+        <a class="text-white hover:text-blue-300" href="/quizCPP">Take Another Quiz</a>
+    </div>
+</nav>
 
-<main>
-    <h2>Your Score: <%= score %></h2>
-    <p>Great job! You have completed the CPP Quiz. Here are your results.</p>
+<div class="container mx-auto p-6">
+    <header class="text-center mb-6">
+        <h1 class="text-3xl font-bold">Congratulations on completing the CPP Quiz!</h1>
+    </header>
 
-    <p>If you want to improve your CPP knowledge, check out the following resources:</p>
+    <main class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Your Score: <span class="text-blue-400"><%= score %></span></h2>
+        <p class="mb-4">Great job! You have completed the CPP Quiz. Here are your results.</p>
+        <p class="mb-6">If you want to improve your CPP knowledge, check out the following resources:</p>
 
-    <ul>
-        <li><a href="/cpp-resources">CPP Resources</a></li>
-        <li><a href="/quizCPP">Take Another Quiz</a></li>
-        <li><a href="/my-learn">Go to My Learn</a></li>
-    </ul>
-</main>
+        <ul class="space-y-4">
+            <li>
+                <a href="/cpp-resources" class="block px-4 py-2 bg-blue-500 text-center rounded hover:bg-blue-600">CPP Resources</a>
+            </li>
+            <li>
+                <a href="/quizCPP" class="block px-4 py-2 bg-blue-500 text-center rounded hover:bg-blue-600">Take Another Quiz</a>
+            </li>
+            <li>
+                <a href="/my-learn" class="block px-4 py-2 bg-blue-500 text-center rounded hover:bg-blue-600">Go to My Learn</a>
+            </li>
+        </ul>
+    </main>
+</div>
 
-<footer>
+<footer class="text-center mt-8 p-4 bg-gray-800">
     <p>&copy; 2024 QuizApp. All rights reserved.</p>
 </footer>
 </body>
